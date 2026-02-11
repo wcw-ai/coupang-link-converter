@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>酷澎連結轉換工具 - 測試版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .subid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .subid-input {
+            padding: 10px 12px;
+            font-size: 13px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            margin: 20px 0;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status.loading {
+            background: #e3f2fd;
+            color: #1976d2;
+            border-left: 4px solid #1976d2;
+        }
+
+        .status.success {
+            background: #e8f5e9;
+            color: #388e3c;
+            border-left: 4px solid #388e3c;
+        }
+
+        .status.error {
+            background: #ffebee;
+            color: #d32f2f;
+            border-left: 4px solid #d32f2f;
+        }
+
+        .result-box {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .result-box.show {
+            display: block;
+        }
+
+        .result-item {
+            margin-bottom: 15px;
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .result-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .result-value {
+            padding: 10px 12px;
+            background: white;
+            border-radius: 6px;
+            font-size: 13px;
+            word-break: break-all;
+            color: #333;
+            border: 1px solid #e0e0e0;
+        }
+
+        .copy-btn {
+            margin-top: 8px;
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            width: auto;
+        }
+
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #856404;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #1976d2;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .api-config {
+            background: #e8eaf6;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+
+        .api-config label {
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .api-config input {
+            font-size: 13px;
+            padding: 8px 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 酷澎連結轉換工具</h1>
+        <p class="subtitle">自動展開短連結並生成追蹤連結</p>
+
+        <div class="info-box">
+            ℹ️ 支援酷澎APP短連結自動展開（link.tw.coupang.com）
+        </div>
+
+        <div class="api-config">
+            <label for="apiUrl">API 端點</label>
+            <input 
+                type="text" 
+                id="apiUrl" 
+                value="http://localhost:5000"
+                placeholder="例如: http://localhost:5000 或 https://your-api.com"
+            >
+            <small style="display: block; margin-top: 4px; color: #666;">
+                本地測試用 localhost:5000，部署後改成你的 API 網址
+            </small>
+        </div>
+
+        <div class="form-group">
+            <label for="productUrl">商品連結</label>
+            <input 
+                type="text" 
+                id="productUrl" 
+                placeholder="貼上酷澎商品連結或短連結..."
+                autocomplete="off"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="baseUrl">Base Tracking URL</label>
+            <input 
+                type="text" 
+                id="baseUrl" 
+                placeholder="輸入你的 Base Tracking URL..."
+                value="https://vbtrax.com/track/clicks/3559/c627c2b99b0221ddfc9cbd2e8d2b8914736248c176eff0ab416db100620d"
+            >
+        </div>
+
+        <div class="form-group">
+            <label>追蹤標籤（選填）</label>
+            <div class="subid-container">
+                <input type="text" class="subid-input" id="subid1" placeholder="subid_1">
+                <input type="text" class="subid-input" id="subid2" placeholder="subid_2">
+                <input type="text" class="subid-input" id="subid3" placeholder="subid_3">
+                <input type="text" class="subid-input" id="subid4" placeholder="subid_4">
+                <input type="text" class="subid-input" id="subid5" placeholder="subid_5">
+                <input type="text" class="subid-input" id="uniqueId" placeholder="unique_id">
+            </div>
+        </div>
+
+        <button id="convertBtn">生成追蹤連結</button>
+
+        <div class="status" id="status"></div>
+
+        <div class="result-box" id="resultBox">
+            <div class="result-item" id="originalUrlBox" style="display:none;">
+                <div class="result-label">原始短連結</div>
+                <div class="result-value" id="originalUrl"></div>
+            </div>
+
+            <div class="result-item" id="expandedUrlBox" style="display:none;">
+                <div class="result-label">✅ 展開後的完整連結</div>
+                <div class="result-value" id="expandedUrl"></div>
+            </div>
+
+            <div class="result-item">
+                <div class="result-label">追蹤連結</div>
+                <div class="result-value" id="trackingUrl"></div>
+                <button class="copy-btn" onclick="copyTrackingLink()">📋 複製連結</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const convertBtn = document.getElementById('convertBtn');
+        const productUrlInput = document.getElementById('productUrl');
+        const baseUrlInput = document.getElementById('baseUrl');
+        const apiUrlInput = document.getElementById('apiUrl');
+        const statusDiv = document.getElementById('status');
+        const resultBox = document.getElementById('resultBox');
+
+        // 顯示狀態（帶 spinner）
+        function showStatus(message, type) {
+            let content = message;
+            if (type === 'loading') {
+                content = '<span class="spinner"></span>' + message;
+            }
+            statusDiv.innerHTML = content;
+            statusDiv.className = 'status show ' + type;
+        }
+
+        // 隱藏狀態
+        function hideStatus() {
+            statusDiv.className = 'status';
+        }
+
+        // 主要轉換函數（使用後端 API）
+        async function convertLink() {
+            const productUrl = productUrlInput.value.trim();
+            const baseUrl = baseUrlInput.value.trim();
+            const apiUrl = apiUrlInput.value.trim();
+
+            // 驗證輸入
+            if (!productUrl) {
+                showStatus('請輸入商品連結', 'error');
+                return;
+            }
+
+            if (!baseUrl) {
+                showStatus('請輸入 Base Tracking URL', 'error');
+                return;
+            }
+
+            if (!apiUrl) {
+                showStatus('請輸入 API 端點', 'error');
+                return;
+            }
+
+            // 收集 subid
+            const subIds = {
+                'subid_1': document.getElementById('subid1').value.trim(),
+                'subid_2': document.getElementById('subid2').value.trim(),
+                'subid_3': document.getElementById('subid3').value.trim(),
+                'subid_4': document.getElementById('subid4').value.trim(),
+                'subid_5': document.getElementById('subid5').value.trim(),
+                'unique_id': document.getElementById('uniqueId').value.trim()
+            };
+
+            convertBtn.disabled = true;
+            resultBox.classList.remove('show');
+            showStatus('正在處理連結...', 'loading');
+
+            try {
+                // 呼叫後端 API
+                const response = await fetch(`${apiUrl}/api/generate-tracking`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        product_url: productUrl,
+                        base_url: baseUrl,
+                        sub_ids: subIds
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // 顯示結果
+                    if (result.is_short_link && result.expanded_url) {
+                        document.getElementById('originalUrlBox').style.display = 'block';
+                        document.getElementById('originalUrl').textContent = result.original_url;
+                        document.getElementById('expandedUrlBox').style.display = 'block';
+                        document.getElementById('expandedUrl').textContent = result.expanded_url;
+                    } else {
+                        document.getElementById('originalUrlBox').style.display = 'none';
+                        document.getElementById('expandedUrlBox').style.display = 'none';
+                    }
+
+                    document.getElementById('trackingUrl').textContent = result.tracking_url;
+                    resultBox.classList.add('show');
+                    
+                    showStatus('✅ 追蹤連結生成成功！', 'success');
+                } else {
+                    showStatus(`❌ ${result.error}`, 'error');
+                }
+
+            } catch (error) {
+                console.error('錯誤:', error);
+                showStatus('❌ 無法連接到 API，請確認 API 是否正在運行', 'error');
+            } finally {
+                convertBtn.disabled = false;
+            }
+        }
+
+        // 複製追蹤連結
+        function copyTrackingLink() {
+            const trackingUrl = document.getElementById('trackingUrl').textContent;
+            
+            navigator.clipboard.writeText(trackingUrl).then(() => {
+                showStatus('✅ 已複製到剪貼簿！', 'success');
+                setTimeout(hideStatus, 2000);
+            }).catch(err => {
+                showStatus('❌ 複製失敗，請手動複製', 'error');
+            });
+        }
+
+        // 綁定按鈕事件
+        convertBtn.addEventListener('click', convertLink);
+
+        // Enter 鍵快速轉換
+        productUrlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                convertLink();
+            }
+        });
+
+        baseUrlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                convertLink();
+            }
+        });
+    </script>
+</body>
+</html>
