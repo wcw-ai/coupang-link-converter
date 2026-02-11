@@ -4,7 +4,7 @@ import requests
 from urllib.parse import quote
 
 app = Flask(__name__)
-CORS(app)  # 允許跨域請求
+CORS(app, resources={r"/api/*": {"origins": "*"}})  # 允許所有來源的跨域請求
 
 @app.route('/api/expand-url', methods=['POST'])
 def expand_url():
