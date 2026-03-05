@@ -1,484 +1,690 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>酷澎連結轉換工具</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>聯盟網連結產生器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f6f8fb;
+    color: #0f172a;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  input, textarea, button { font-family: inherit; }
+  input:focus, textarea:focus { border-color: #2563eb !important; box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+  button { transition: opacity 0.15s; }
+  button:active { opacity: 0.75; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+  /* Setup */
+  .setup-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(145deg, #f0f4ff 0%, #fafbff 50%, #f5f0ff 100%); }
+  .setup-card { width: 100%; max-width: 440px; background: #fff; border-radius: 20px; padding: 36px 28px 28px; box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 12px 40px rgba(0,0,0,0.06); }
+  .setup-brand { text-align: center; margin-bottom: 28px; }
+  .setup-logo { width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, #2563eb, #7c3aed); color: #fff; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+  .setup-title { font-size: 21px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 6px; }
+  .setup-desc { font-size: 13.5px; color: #64748b; line-height: 1.5; }
 
-        .container {
-            background: white;
-            border-radius: 16px;
-            padding: 40px;
-            max-width: 600px;
-            width: 100%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
+  .form-group { margin-bottom: 18px; }
+  .form-label { display: block; font-size: 13px; font-weight: 650; color: #1e293b; margin-bottom: 6px; }
+  .form-input { width: 100%; padding: 11px 14px; font-size: 14px; border: 1.5px solid #e2e8f0; border-radius: 11px; outline: none; color: #0f172a; background: #fafbfc; }
+  .form-hint { font-size: 11.5px; color: #94a3b8; margin-top: 5px; line-height: 1.4; }
+  .error-box { font-size: 13px; color: #dc2626; background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; line-height: 1.5; white-space: pre-line; }
+  .progress-box { font-size: 13px; color: #2563eb; background: #eff6ff; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; text-align: center; }
+  .btn-primary { width: 100%; padding: 12px; font-size: 14.5px; font-weight: 700; color: #fff; background: linear-gradient(135deg, #2563eb, #4f46e5); border: none; border-radius: 11px; cursor: pointer; }
+  .btn-primary:disabled { opacity: 0.65; cursor: not-allowed; }
 
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 28px;
-        }
+  /* Header */
+  .hdr { background: #fff; border-bottom: 1px solid #eef1f6; position: sticky; top: 0; z-index: 100; }
+  .hdr-inner { max-width: 600px; margin: 0 auto; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; }
+  .hdr-left { display: flex; align-items: center; gap: 10px; }
+  .hdr-logo { width: 34px; height: 34px; border-radius: 9px; background: linear-gradient(135deg, #2563eb, #7c3aed); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .hdr-title { font-size: 16px; font-weight: 800; letter-spacing: -0.03em; }
+  .hdr-meta { font-size: 11px; color: #94a3b8; }
+  .hdr-actions { display: flex; gap: 6px; }
+  .hdr-btn { width: 34px; height: 34px; border-radius: 9px; border: 1.5px solid #e8ecf2; background: #fff; color: #64748b; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .hdr-btn.active { border-color: #2563eb; background: #eff6ff; color: #2563eb; }
 
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
+  /* Main */
+  .main-content { max-width: 600px; margin: 0 auto; padding: 14px 16px 100px; display: flex; flex-direction: column; gap: 14px; }
+  .card { background: #fff; border-radius: 16px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); border: 1px solid #eef1f6; }
+  .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .card-label { font-size: 13.5px; font-weight: 700; }
+  .mode-toggle { font-size: 12px; font-weight: 600; color: #2563eb; background: #f0f4ff; border: none; border-radius: 6px; padding: 4px 10px; cursor: pointer; }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+  .input-field { width: 100%; padding: 11px 14px; font-size: 14px; border: 1.5px solid #e2e8f0; border-radius: 11px; outline: none; color: #0f172a; background: #fafbfc; }
+  .input-area { width: 100%; padding: 11px 14px; font-size: 13px; border: 1.5px solid #e2e8f0; border-radius: 11px; outline: none; color: #0f172a; background: #fafbfc; font-family: 'SF Mono', Consolas, monospace; resize: vertical; line-height: 1.6; min-height: 90px; }
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-            font-size: 14px;
-        }
+  .sub-toggle { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: #64748b; background: none; border: none; cursor: pointer; padding: 10px 0 0; }
+  .sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; padding: 12px; background: #f8fafc; border-radius: 11px; }
+  .sub-label { font-size: 10.5px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 3px; display: block; }
+  .sub-input { padding: 8px 10px; font-size: 13px; border: 1.5px solid #e2e8f0; border-radius: 8px; outline: none; color: #0f172a; background: #fff; width: 100%; }
 
-        input[type="text"] {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
+  .gen-btn { width: 100%; padding: 12px; font-size: 14px; font-weight: 700; color: #fff; background: #0f172a; border: none; border-radius: 11px; cursor: pointer; margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 6px; }
 
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #667eea;
-        }
+  .copy-btn { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; font-size: 11.5px; font-weight: 700; border: none; border-radius: 7px; cursor: pointer; white-space: nowrap; flex-shrink: 0; background: #f0f4ff; color: #2563eb; }
+  .copy-btn.copied { background: #ecfdf5; color: #059669; }
 
-        .subid-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 10px;
-        }
+  .result-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+  .res-ok { background: #f8fafc; border-radius: 12px; padding: 14px; border: 1px solid #eef1f6; }
+  .res-err { background: #fef2f2; border-radius: 12px; padding: 14px; border: 1px solid #fecaca; }
+  .res-head { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
+  .badge { font-size: 11px; font-weight: 700; color: #2563eb; background: #eff6ff; padding: 2px 8px; border-radius: 5px; display: inline-block; }
+  .warn-badge { font-size: 10px; color: #d97706; background: #fffbeb; padding: 2px 7px; border-radius: 5px; }
+  .res-url { font-size: 12px; color: #94a3b8; margin-bottom: 8px; word-break: break-all; line-height: 1.4; }
+  .res-err-text { font-size: 13px; color: #dc2626; font-weight: 600; }
+  .res-out { background: #fff; border-radius: 9px; padding: 9px 11px; border: 1px solid #e8ecf2; display: flex; align-items: flex-start; gap: 8px; }
+  .res-out-text { font-size: 11px; color: #334155; word-break: break-all; line-height: 1.55; flex: 1; font-family: 'SF Mono', Consolas, monospace; }
 
-        .subid-input {
-            padding: 10px 12px;
-            font-size: 13px;
-        }
+  .panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .close-btn { background: none; border: none; color: #94a3b8; cursor: pointer; padding: 4px; display: flex; align-items: center; }
+  .close-group { display: flex; gap: 6px; }
 
-        button {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
+  .brand-list { max-height: 380px; overflow-y: auto; }
+  .brand-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f3f5f8; gap: 10px; }
+  .brand-name { font-size: 13px; font-weight: 650; }
+  .brand-id { font-size: 11px; color: #cbd5e1; font-weight: 400; }
+  .brand-domain { font-size: 11px; color: #94a3b8; margin-top: 1px; }
+  .brand-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .dl-badge { font-size: 10px; font-weight: 700; color: #059669; background: #ecfdf5; padding: 2px 7px; border-radius: 5px; }
+  .comm-text { font-size: 11px; color: #64748b; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
-        }
+  .hist-list { max-height: 400px; overflow-y: auto; }
+  .hist-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f3f5f8; }
+  .hist-url { font-size: 12px; color: #64748b; margin: 4px 0 2px; word-break: break-all; line-height: 1.35; }
+  .hist-time { font-size: 10px; color: #cbd5e1; }
 
-        button:active {
-            transform: translateY(0);
-        }
+  .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f3f5f8; gap: 12px; }
+  .setting-title { font-size: 13px; font-weight: 650; }
+  .setting-desc { font-size: 11.5px; color: #94a3b8; margin-top: 2px; }
+  .setting-btn { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; font-size: 12px; font-weight: 700; color: #2563eb; background: #f0f4ff; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap; }
+  .setting-btn.danger { color: #dc2626; background: #fef2f2; }
+  .setting-meta { margin-top: 14px; padding: 12px; background: #f8fafc; border-radius: 10px; font-size: 11.5px; color: #94a3b8; line-height: 1.7; font-family: 'SF Mono', Consolas, monospace; word-break: break-all; }
 
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
+  .empty { font-size: 13px; color: #94a3b8; text-align: center; padding: 24px 0; }
+  .hidden { display: none !important; }
 
-        .status {
-            margin: 20px 0;
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            display: none;
-        }
-
-        .status.show {
-            display: block;
-        }
-
-        .status.loading {
-            background: #e3f2fd;
-            color: #1976d2;
-            border-left: 4px solid #1976d2;
-        }
-
-        .status.success {
-            background: #e8f5e9;
-            color: #388e3c;
-            border-left: 4px solid #388e3c;
-        }
-
-        .status.error {
-            background: #ffebee;
-            color: #d32f2f;
-            border-left: 4px solid #d32f2f;
-        }
-
-        .result-box {
-            display: none;
-            margin-top: 20px;
-            padding: 20px;
-            background: #f5f5f5;
-            border-radius: 8px;
-        }
-
-        .result-box.show {
-            display: block;
-        }
-
-        .result-item {
-            margin-bottom: 15px;
-        }
-
-        .result-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .result-label {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
-
-        .result-value {
-            padding: 10px 12px;
-            background: white;
-            border-radius: 6px;
-            font-size: 13px;
-            word-break: break-all;
-            color: #333;
-            border: 1px solid #e0e0e0;
-        }
-
-        .copy-btn {
-            margin-top: 8px;
-            padding: 8px 16px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 13px;
-            cursor: pointer;
-            width: auto;
-        }
-
-        .copy-btn:hover {
-            background: #5568d3;
-        }
-
-        .info-box {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 12px 16px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            font-size: 13px;
-            color: #856404;
-        }
-
-        .api-config {
-            background: #f5f5f5;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 13px;
-        }
-
-        .api-config input {
-            font-size: 13px;
-            padding: 8px 12px;
-            margin-top: 5px;
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            border: 2px solid #1976d2;
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .toggle-api {
-            cursor: pointer;
-            color: #667eea;
-            font-size: 12px;
-            text-decoration: underline;
-            margin-bottom: 20px;
-            display: inline-block;
-        }
-    </style>
+  /* SVG icons inline */
+  .icon { display: inline-flex; align-items: center; justify-content: center; }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>🔗 酷澎連結轉換工具</h1>
-        <p class="subtitle">自動展開短連結並生成追蹤連結</p>
 
-        <div class="info-box">
-            ℹ️ 支援酷澎APP短連結自動展開（link.tw.coupang.com）
-        </div>
-
-        <span class="toggle-api" onclick="toggleApiConfig()">⚙️ 進階設定</span>
-
-        <div class="api-config" id="apiConfig" style="display:none;">
-            <label for="apiUrl">API 端點網址</label>
-            <input 
-                type="text" 
-                id="apiUrl" 
-                placeholder="請輸入 API 網址"
-            >
-            <small style="display: block; margin-top: 4px; color: #666;">
-                例如：https://your-api.onrender.com
-            </small>
-        </div>
-
-        <div class="form-group">
-            <label for="productUrl">商品連結</label>
-            <input 
-                type="text" 
-                id="productUrl" 
-                placeholder="貼上酷澎商品連結或短連結..."
-                autocomplete="off"
-            >
-        </div>
-
-        <div class="form-group">
-            <label for="baseUrl">Base Tracking URL</label>
-            <input 
-                type="text" 
-                id="baseUrl" 
-                placeholder="輸入你的 Base Tracking URL..."
-                value="https://vbtrax.com/track/clicks/3559/c627c2b99b0221ddfc9cbd2e8d2b8914736248c176eff0ab416db100620d"
-            >
-        </div>
-
-        <div class="form-group">
-            <label>追蹤標籤（選填）</label>
-            <div class="subid-container">
-                <input type="text" class="subid-input" id="subid1" placeholder="subid_1">
-                <input type="text" class="subid-input" id="subid2" placeholder="subid_2">
-                <input type="text" class="subid-input" id="subid3" placeholder="subid_3">
-                <input type="text" class="subid-input" id="subid4" placeholder="subid_4">
-                <input type="text" class="subid-input" id="subid5" placeholder="subid_5">
-                <input type="text" class="subid-input" id="uniqueId" placeholder="unique_id">
-            </div>
-        </div>
-
-        <button id="convertBtn">生成追蹤連結</button>
-
-        <div class="status" id="status"></div>
-
-        <div class="result-box" id="resultBox">
-            <div class="result-item" id="originalUrlBox" style="display:none;">
-                <div class="result-label">原始短連結</div>
-                <div class="result-value" id="originalUrl"></div>
-            </div>
-
-            <div class="result-item" id="expandedUrlBox" style="display:none;">
-                <div class="result-label">✅ 展開後的完整連結</div>
-                <div class="result-value" id="expandedUrl"></div>
-            </div>
-
-            <div class="result-item">
-                <div class="result-label">追蹤連結</div>
-                <div class="result-value" id="trackingUrl"></div>
-                <button class="copy-btn" onclick="copyTrackingLink()">📋 複製連結</button>
-            </div>
-        </div>
+<!-- ====== Setup Screen ====== -->
+<div id="setup-screen" class="setup-wrap">
+  <div class="setup-card">
+    <div class="setup-brand">
+      <div class="setup-logo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <h1 class="setup-title">聯盟網連結產生器</h1>
+      <p class="setup-desc">輸入 API Key 即可開始使用</p>
     </div>
+    <div class="form-group">
+      <label class="form-label">API Key</label>
+      <input type="text" id="apiKeyInput" class="form-input" placeholder="貼上你的 API Key" autocomplete="off">
+      <p class="form-hint">可在聯盟網後台「API 應用」頁面取得</p>
+    </div>
+    <div id="setup-error" class="error-box hidden"></div>
+    <div id="setup-progress" class="progress-box hidden"></div>
+    <button id="setupBtn" class="btn-primary" onclick="handleSetup()">開始使用</button>
+  </div>
+</div>
 
-    <script>
-        // 預設 API 網址（可以更改）
-        const DEFAULT_API_URLS = [
-            'https://coupang-link-converter.onrender.com',
-            'https://coupang-link-converter.vercel.app'
-        ];
-        
-        const convertBtn = document.getElementById('convertBtn');
-        const productUrlInput = document.getElementById('productUrl');
-        const baseUrlInput = document.getElementById('baseUrl');
-        const apiUrlInput = document.getElementById('apiUrl');
-        const statusDiv = document.getElementById('status');
-        const resultBox = document.getElementById('resultBox');
-        const apiConfig = document.getElementById('apiConfig');
+<!-- ====== Main Screen ====== -->
+<div id="main-screen" class="hidden">
+  <header class="hdr">
+    <div class="hdr-inner">
+      <div class="hdr-left">
+        <div class="hdr-logo">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <div>
+          <h1 class="hdr-title">連結產生器</h1>
+          <p class="hdr-meta" id="brandCount"></p>
+        </div>
+      </div>
+      <div class="hdr-actions">
+        <button class="hdr-btn" id="brandsBtn" onclick="togglePanel('brands')" title="品牌列表">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        </button>
+        <button class="hdr-btn" id="historyBtn" onclick="togglePanel('history')" title="歷史記錄">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </button>
+        <button class="hdr-btn" id="settingsBtn" onclick="togglePanel('settings')" title="設定">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
 
-        // 從 localStorage 讀取或使用預設值
-        apiUrlInput.value = localStorage.getItem('apiUrl') || DEFAULT_API_URLS[0];
+  <main class="main-content">
+    <!-- Input Card -->
+    <section class="card">
+      <div class="card-top">
+        <span class="card-label">商品網址</span>
+        <button class="mode-toggle" id="modeToggle" onclick="toggleBatchMode()">切換批次</button>
+      </div>
+      <div id="singleInput">
+        <input type="url" id="urlInput" class="input-field" placeholder="貼上商品網址..." onkeydown="if(event.key==='Enter')handleGenerate()">
+      </div>
+      <div id="batchInput" class="hidden">
+        <textarea id="batchTextarea" class="input-area" rows="4" placeholder="每行一個網址&#10;https://www.nike.com/tw/...&#10;https://www.adidas.com.tw/..."></textarea>
+      </div>
 
-        // 顯示/隱藏 API 設定
-        function toggleApiConfig() {
-            if (apiConfig.style.display === 'none') {
-                apiConfig.style.display = 'block';
-            } else {
-                apiConfig.style.display = 'none';
-            }
-        }
+      <button class="sub-toggle" onclick="toggleSubIds()">
+        <span>追蹤標籤（選填）</span>
+        <svg id="subChevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div id="subIdSection" class="sub-grid hidden">
+        <div><label class="sub-label">Unique ID</label><input class="sub-input" id="sub_aff_uniq_id" placeholder="Unique ID"></div>
+        <div><label class="sub-label">Sub ID 1</label><input class="sub-input" id="sub_subid_1" placeholder="Sub ID 1"></div>
+        <div><label class="sub-label">Sub ID 2</label><input class="sub-input" id="sub_subid_2" placeholder="Sub ID 2"></div>
+        <div><label class="sub-label">Sub ID 3</label><input class="sub-input" id="sub_subid_3" placeholder="Sub ID 3"></div>
+        <div><label class="sub-label">Sub ID 4</label><input class="sub-input" id="sub_subid_4" placeholder="Sub ID 4"></div>
+        <div><label class="sub-label">Sub ID 5</label><input class="sub-input" id="sub_subid_5" placeholder="Sub ID 5"></div>
+      </div>
 
-        // 儲存 API 網址
-        apiUrlInput.addEventListener('change', () => {
-            localStorage.setItem('apiUrl', apiUrlInput.value.trim());
-        });
+      <button class="gen-btn" onclick="handleGenerate()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        <span>產生追蹤連結</span>
+      </button>
+    </section>
 
-        // 顯示狀態
-        function showStatus(message, type) {
-            let content = message;
-            if (type === 'loading') {
-                content = '<span class="spinner"></span>' + message;
-            }
-            statusDiv.innerHTML = content;
-            statusDiv.className = 'status show ' + type;
-        }
+    <!-- Results -->
+    <section class="card hidden" id="resultsCard">
+      <span class="card-label">產生結果</span>
+      <div class="result-list" id="resultList"></div>
+      <div id="copyAllWrap" class="hidden" style="margin-top:10px"></div>
+    </section>
 
-        // 隱藏狀態
-        function hideStatus() {
-            statusDiv.className = 'status';
-        }
+    <!-- Brands Panel -->
+    <section class="card hidden" id="brandsPanel">
+      <div class="panel-head">
+        <span class="card-label" id="brandsPanelTitle"></span>
+        <button class="close-btn" onclick="togglePanel('brands')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <input class="input-field" id="brandSearchInput" placeholder="搜尋品牌名稱、網域或 ID..." oninput="renderBrands()" style="margin-bottom:8px;font-size:13px">
+      <div class="brand-list" id="brandListContainer"></div>
+    </section>
 
-        // 主要轉換函數
-        async function convertLink() {
-            const productUrl = productUrlInput.value.trim();
-            const baseUrl = baseUrlInput.value.trim();
-            const apiUrl = apiUrlInput.value.trim();
+    <!-- History Panel -->
+    <section class="card hidden" id="historyPanel">
+      <div class="panel-head">
+        <span class="card-label">轉換記錄</span>
+        <div class="close-group">
+          <button class="close-btn" id="clearHistBtn" onclick="clearHistory()" title="清除全部">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+          <button class="close-btn" onclick="togglePanel('history')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="hist-list" id="histListContainer"></div>
+    </section>
 
-            // 驗證輸入
-            if (!productUrl) {
-                showStatus('請輸入商品連結', 'error');
-                return;
-            }
+    <!-- Settings Panel -->
+    <section class="card hidden" id="settingsPanel">
+      <div class="panel-head">
+        <span class="card-label">設定</span>
+        <button class="close-btn" onclick="togglePanel('settings')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="setting-item">
+        <div><div class="setting-title">重新載入品牌</div><div class="setting-desc">從 API 重新拉取最新品牌列表</div></div>
+        <button class="setting-btn" onclick="refreshOffers()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          更新
+        </button>
+      </div>
+      <div class="setting-item">
+        <div><div class="setting-title">重新設定</div><div class="setting-desc">清除所有資料並重新設定</div></div>
+        <button class="setting-btn danger" onclick="handleLogout()">重設</button>
+      </div>
+      <div class="setting-meta" id="settingMeta"></div>
+    </section>
+  </main>
+</div>
 
-            if (!baseUrl) {
-                showStatus('請輸入 Base Tracking URL', 'error');
-                return;
-            }
+<script>
+// ═══════════════════════════════════════
+//  Config
+// ═══════════════════════════════════════
+const WORKER_URL = "https://small-tooth-29d5.wcwaiapp.workers.dev";
+const STORE_CONFIG = "affone_config";
+const STORE_OFFERS = "affone_offers";
+const STORE_HISTORY = "affone_history";
+const STORE_SUBIDS = "affone_subids";
 
-            if (!apiUrl) {
-                showStatus('請在進階設定中輸入 API 網址', 'error');
-                apiConfig.style.display = 'block';
-                return;
-            }
+// ═══════════════════════════════════════
+//  State
+// ═══════════════════════════════════════
+let offers = [];
+let config = null;
+let history = [];
+let batchMode = false;
+let currentPanel = null;
 
-            // 收集 subid
-            const subIds = {
-                'subid_1': document.getElementById('subid1').value.trim(),
-                'subid_2': document.getElementById('subid2').value.trim(),
-                'subid_3': document.getElementById('subid3').value.trim(),
-                'subid_4': document.getElementById('subid4').value.trim(),
-                'subid_5': document.getElementById('subid5').value.trim(),
-                'unique_id': document.getElementById('uniqueId').value.trim()
-            };
+// ═══════════════════════════════════════
+//  Storage
+// ═══════════════════════════════════════
+function storeGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }
+function storeSet(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+function storeRemove(k) { localStorage.removeItem(k); }
 
-            convertBtn.disabled = true;
-            resultBox.classList.remove('show');
-            showStatus('正在處理連結...', 'loading');
+// ═══════════════════════════════════════
+//  Helpers
+// ═══════════════════════════════════════
+function extractDomain(url) {
+  try { return new URL(url.startsWith("http") ? url : "https://" + url).hostname.replace(/^www\./, "").toLowerCase(); }
+  catch { return ""; }
+}
 
-            try {
-                // 呼叫後端 API
-                const response = await fetch(`${apiUrl}/api/generate-tracking`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        product_url: productUrl,
-                        base_url: baseUrl,
-                        sub_ids: subIds
-                    })
-                });
+function doubleEncode(url) {
+  return encodeURIComponent(encodeURIComponent(url));
+}
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+function buildTrackingUrl(baseUrl, targetUrl, subIds) {
+  let result = baseUrl;
+  const params = [];
+  if (subIds.aff_uniq_id) params.push("aff_uniq_id=" + encodeURIComponent(subIds.aff_uniq_id));
+  for (let i = 1; i <= 5; i++) {
+    const v = subIds["subid_" + i];
+    if (v) params.push("subid_" + i + "=" + encodeURIComponent(v));
+  }
+  if (params.length) result += "?" + params.join("&");
+  if (targetUrl) result += (params.length ? "&" : "?") + "t=" + doubleEncode(targetUrl);
+  return result;
+}
 
-                const result = await response.json();
+function parseOffers(raw) {
+  return raw.filter(o => o.default_tracking_url).map(o => ({
+    id: o.id,
+    name: o.name || "Brand #" + o.id,
+    previewUrl: o.preview_url || "",
+    domain: extractDomain(o.preview_url || ""),
+    trackingUrl: o.default_tracking_url,
+    deeplink: o.deeplink || false,
+    commission: o.commission_range || "",
+    conversionType: o.conversion_type || "",
+    categories: o.categories || [],
+  }));
+}
 
-                if (result.success) {
-                    // 顯示結果
-                    if (result.is_short_link && result.expanded_url) {
-                        document.getElementById('originalUrlBox').style.display = 'block';
-                        document.getElementById('originalUrl').textContent = result.original_url;
-                        document.getElementById('expandedUrlBox').style.display = 'block';
-                        document.getElementById('expandedUrl').textContent = result.expanded_url;
-                    } else {
-                        document.getElementById('originalUrlBox').style.display = 'none';
-                        document.getElementById('expandedUrlBox').style.display = 'none';
-                    }
+function getSubIds() {
+  const s = {};
+  s.aff_uniq_id = document.getElementById("sub_aff_uniq_id").value.trim();
+  for (let i = 1; i <= 5; i++) s["subid_" + i] = document.getElementById("sub_subid_" + i).value.trim();
+  storeSet(STORE_SUBIDS, s);
+  return s;
+}
 
-                    document.getElementById('trackingUrl').textContent = result.tracking_url;
-                    resultBox.classList.add('show');
-                    
-                    showStatus('✅ 追蹤連結生成成功！', 'success');
-                } else {
-                    showStatus(`❌ ${result.error}`, 'error');
-                }
+function loadSubIds() {
+  const s = storeGet(STORE_SUBIDS);
+  if (!s) return;
+  if (s.aff_uniq_id) document.getElementById("sub_aff_uniq_id").value = s.aff_uniq_id;
+  for (let i = 1; i <= 5; i++) {
+    if (s["subid_" + i]) document.getElementById("sub_subid_" + i).value = s["subid_" + i];
+  }
+}
 
-            } catch (error) {
-                console.error('錯誤詳情:', error);
-                showStatus(`❌ 無法連接到 API。請檢查 API 網址設定。`, 'error');
-                apiConfig.style.display = 'block';
-            } finally {
-                convertBtn.disabled = false;
-            }
-        }
+function matchOffer(inputUrl) {
+  const d = extractDomain(inputUrl);
+  if (!d) return null;
+  return offers.find(o => o.domain && (d === o.domain || d.endsWith("." + o.domain) || o.domain.endsWith("." + d)));
+}
 
-        // 複製追蹤連結
-        function copyTrackingLink() {
-            const trackingUrl = document.getElementById('trackingUrl').textContent;
-            
-            navigator.clipboard.writeText(trackingUrl).then(() => {
-                showStatus('✅ 已複製到剪貼簿！', 'success');
-                setTimeout(hideStatus, 2000);
-            }).catch(err => {
-                showStatus('❌ 複製失敗，請手動複製', 'error');
-            });
-        }
+function copyText(text, btn) {
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text);
+  } else {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.cssText = "position:fixed;left:-9999px;opacity:0";
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try { document.execCommand("copy"); } catch {}
+    document.body.removeChild(ta);
+  }
+  if (btn) {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 已複製';
+    btn.classList.add("copied");
+    setTimeout(() => { btn.innerHTML = orig; btn.classList.remove("copied"); }, 1400);
+  }
+}
 
-        // 綁定按鈕事件
-        convertBtn.addEventListener('click', convertLink);
+function escapeHtml(str) {
+  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
 
-        // Enter 鍵快速轉換
-        productUrlInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                convertLink();
-            }
-        });
+// ═══════════════════════════════════════
+//  Setup
+// ═══════════════════════════════════════
+let setupAttempts = 0;
 
-        baseUrlInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                convertLink();
-            }
-        });
-    </script>
+async function handleSetup() {
+  const apiKey = document.getElementById("apiKeyInput").value.trim();
+  if (!apiKey) { showSetupError("請輸入 API Key"); return; }
+
+  const btn = document.getElementById("setupBtn");
+  btn.disabled = true;
+  btn.textContent = "載入中...";
+  hideSetupError();
+  showSetupProgress("正在載入品牌資料，可能需要幾秒鐘...");
+  setupAttempts++;
+
+  try {
+    const res = await fetch(WORKER_URL + "/offers?api_key=" + encodeURIComponent(apiKey));
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "連線失敗 (" + res.status + ")");
+    }
+    showSetupProgress("正在解析品牌資料...");
+    const json = await res.json();
+    const parsed = parseOffers(json.data || []);
+    if (parsed.length === 0) throw new Error("沒有找到已申請的品牌，請確認 API Key 是否正確");
+
+    config = { apiKey };
+    offers = parsed;
+    storeSet(STORE_CONFIG, config);
+    storeSet(STORE_OFFERS, { offers, total: json.total, updatedAt: Date.now() });
+    history = storeGet(STORE_HISTORY) || [];
+    setupAttempts = 0;
+
+    showMainScreen();
+  } catch (e) {
+    let msg = e.message || "連線失敗，請稍後再試";
+
+    // 補充更友善的提示
+    if (msg.includes("429") || msg.includes("頻繁") || msg.includes("Rate limit")) {
+      msg = "API 請求過於頻繁，聯盟網限制每 10 分鐘 2 次請求。請等待 10 分鐘後再試。";
+    } else if (msg.includes("504") || msg.includes("超時") || msg.includes("無回應")) {
+      msg = "聯盟網伺服器回應較慢，請稍後再試一次。";
+    } else if (msg.includes("Failed to fetch") || msg.includes("NetworkError")) {
+      msg = "網路連線失敗，請檢查網路狀態後再試。";
+    }
+
+    if (setupAttempts >= 2) {
+      msg += "\n\n提示：如果持續失敗，請等待 10 分鐘後再試（聯盟網 API 限制每 10 分鐘 2 次請求）。";
+    }
+
+    showSetupError(msg);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "開始使用";
+    hideSetupProgress();
+  }
+}
+
+function showSetupError(msg) { const el = document.getElementById("setup-error"); el.innerText = msg; el.classList.remove("hidden"); }
+function hideSetupError() { document.getElementById("setup-error").classList.add("hidden"); }
+function showSetupProgress(msg) { const el = document.getElementById("setup-progress"); el.textContent = msg; el.classList.remove("hidden"); }
+function hideSetupProgress() { document.getElementById("setup-progress").classList.add("hidden"); }
+
+// ═══════════════════════════════════════
+//  Main Screen
+// ═══════════════════════════════════════
+function showMainScreen() {
+  document.getElementById("setup-screen").classList.add("hidden");
+  document.getElementById("main-screen").classList.remove("hidden");
+  document.getElementById("brandCount").textContent = offers.length + " 個品牌";
+  loadSubIds();
+  updateSettingMeta();
+}
+
+function showSetupScreen() {
+  document.getElementById("main-screen").classList.add("hidden");
+  document.getElementById("setup-screen").classList.remove("hidden");
+  document.getElementById("apiKeyInput").value = config?.apiKey || "";
+}
+
+// ═══════════════════════════════════════
+//  Generate
+// ═══════════════════════════════════════
+function handleGenerate() {
+  const subIds = getSubIds();
+  let results = [];
+
+  if (batchMode) {
+    const urls = document.getElementById("batchTextarea").value.split("\n").map(s => s.trim()).filter(Boolean);
+    if (!urls.length) return;
+    results = urls.map(u => genOne(u, subIds));
+  } else {
+    const url = document.getElementById("urlInput").value.trim();
+    if (!url) return;
+    results = [genOne(url, subIds)];
+  }
+
+  renderResults(results);
+
+  // Save history
+  const ok = results.filter(r => !r.err && r.out);
+  if (ok.length) {
+    const newItems = ok.map(r => ({ url: r.url, out: r.out, brand: r.offer?.name, ts: Date.now() }));
+    history = [...newItems, ...history].slice(0, 50);
+    storeSet(STORE_HISTORY, history);
+  }
+}
+
+function genOne(inputUrl, subIds) {
+  const offer = matchOffer(inputUrl);
+  if (!offer) return { url: inputUrl, err: "找不到匹配的品牌", offer: null, out: "" };
+  if (!offer.deeplink) return { url: inputUrl, err: null, offer, out: offer.trackingUrl, warn: "不支援自訂連結，使用預設追蹤連結" };
+  return { url: inputUrl, err: null, offer, out: buildTrackingUrl(offer.trackingUrl, inputUrl, subIds) };
+}
+
+function renderResults(results) {
+  const card = document.getElementById("resultsCard");
+  const list = document.getElementById("resultList");
+  const copyAllWrap = document.getElementById("copyAllWrap");
+  card.classList.remove("hidden");
+
+  let html = "";
+  results.forEach((r, i) => {
+    if (r.err) {
+      html += '<div class="res-err"><p class="res-url">' + escapeHtml(r.url) + '</p><p class="res-err-text">' + escapeHtml(r.err) + '</p></div>';
+    } else {
+      html += '<div class="res-ok">';
+      html += '<div class="res-head"><span class="badge">' + escapeHtml(r.offer.name) + '</span>';
+      if (r.warn) html += '<span class="warn-badge">' + escapeHtml(r.warn) + '</span>';
+      html += '</div>';
+      html += '<p class="res-url">' + escapeHtml(r.url) + '</p>';
+      html += '<div class="res-out"><p class="res-out-text">' + escapeHtml(r.out) + '</p>';
+      html += '<button class="copy-btn" onclick="copyText(\'' + escapeHtml(r.out).replace(/'/g, "\\'") + '\', this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> 複製</button>';
+      html += '</div></div>';
+    }
+  });
+  list.innerHTML = html;
+
+  const okResults = results.filter(r => !r.err);
+  if (okResults.length > 1) {
+    const allUrls = okResults.map(r => r.out).join("\n");
+    copyAllWrap.classList.remove("hidden");
+    copyAllWrap.innerHTML = '<button class="copy-btn" onclick="copyText(`' + allUrls.replace(/`/g, "\\`") + '`, this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> 複製全部連結</button>';
+  } else {
+    copyAllWrap.classList.add("hidden");
+  }
+
+  // Scroll to results
+  card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+// ═══════════════════════════════════════
+//  Batch Mode
+// ═══════════════════════════════════════
+function toggleBatchMode() {
+  batchMode = !batchMode;
+  document.getElementById("singleInput").classList.toggle("hidden", batchMode);
+  document.getElementById("batchInput").classList.toggle("hidden", !batchMode);
+  document.getElementById("modeToggle").textContent = batchMode ? "切換單一" : "切換批次";
+}
+
+// ═══════════════════════════════════════
+//  Sub IDs
+// ═══════════════════════════════════════
+function toggleSubIds() {
+  const section = document.getElementById("subIdSection");
+  const chev = document.getElementById("subChevron");
+  section.classList.toggle("hidden");
+  if (section.classList.contains("hidden")) {
+    chev.innerHTML = '<polyline points="6 9 12 15 18 9"/>';
+  } else {
+    chev.innerHTML = '<polyline points="18 15 12 9 6 15"/>';
+  }
+}
+
+// ═══════════════════════════════════════
+//  Panels
+// ═══════════════════════════════════════
+function togglePanel(name) {
+  const panels = { brands: "brandsPanel", history: "historyPanel", settings: "settingsPanel" };
+  const btns = { brands: "brandsBtn", history: "historyBtn", settings: "settingsBtn" };
+
+  if (currentPanel === name) {
+    document.getElementById(panels[name]).classList.add("hidden");
+    document.getElementById(btns[name]).classList.remove("active");
+    currentPanel = null;
+    return;
+  }
+
+  // Close current
+  if (currentPanel) {
+    document.getElementById(panels[currentPanel]).classList.add("hidden");
+    document.getElementById(btns[currentPanel]).classList.remove("active");
+  }
+
+  currentPanel = name;
+  document.getElementById(panels[name]).classList.remove("hidden");
+  document.getElementById(btns[name]).classList.add("active");
+
+  if (name === "brands") renderBrands();
+  if (name === "history") renderHistory();
+  if (name === "settings") updateSettingMeta();
+}
+
+// ═══════════════════════════════════════
+//  Brands
+// ═══════════════════════════════════════
+function renderBrands() {
+  const q = document.getElementById("brandSearchInput").value.toLowerCase();
+  const filtered = q
+    ? offers.filter(o => o.name.toLowerCase().includes(q) || o.domain.includes(q) || String(o.id).includes(q))
+    : offers;
+
+  document.getElementById("brandsPanelTitle").textContent = "已申請品牌（" + offers.length + "）";
+
+  if (filtered.length === 0) {
+    document.getElementById("brandListContainer").innerHTML = '<p class="empty">找不到匹配的品牌</p>';
+    return;
+  }
+
+  let html = "";
+  filtered.forEach(o => {
+    html += '<div class="brand-item"><div style="flex:1;min-width:0">';
+    html += '<div class="brand-name">' + escapeHtml(o.name) + ' <span class="brand-id">#' + o.id + '</span></div>';
+    html += '<div class="brand-domain">' + (o.domain || "—") + '</div></div>';
+    html += '<div class="brand-right">';
+    if (o.deeplink) html += '<span class="dl-badge">Deeplink</span>';
+    if (o.commission) html += '<span class="comm-text">' + escapeHtml(o.commission) + '</span>';
+    html += '</div></div>';
+  });
+  document.getElementById("brandListContainer").innerHTML = html;
+}
+
+// ═══════════════════════════════════════
+//  History
+// ═══════════════════════════════════════
+function renderHistory() {
+  const container = document.getElementById("histListContainer");
+  document.getElementById("clearHistBtn").classList.toggle("hidden", history.length === 0);
+
+  if (history.length === 0) {
+    container.innerHTML = '<p class="empty">尚無記錄</p>';
+    return;
+  }
+
+  let html = "";
+  history.forEach(h => {
+    html += '<div class="hist-item"><div style="flex:1;min-width:0">';
+    html += '<span class="badge">' + escapeHtml(h.brand || "") + '</span>';
+    html += '<p class="hist-url">' + escapeHtml(h.url) + '</p>';
+    html += '<p class="hist-time">' + new Date(h.ts).toLocaleString("zh-TW") + '</p>';
+    html += '</div>';
+    html += '<button class="copy-btn" onclick="copyText(\'' + escapeHtml(h.out).replace(/'/g, "\\'") + '\', this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> 複製</button>';
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+
+function clearHistory() {
+  history = [];
+  storeSet(STORE_HISTORY, []);
+  renderHistory();
+}
+
+// ═══════════════════════════════════════
+//  Settings
+// ═══════════════════════════════════════
+function updateSettingMeta() {
+  const d = storeGet(STORE_OFFERS);
+  const el = document.getElementById("settingMeta");
+  el.innerHTML =
+    "<p style='margin:0 0 2px'>API Key: " + config.apiKey.slice(0, 8) + "..." + config.apiKey.slice(-4) + "</p>" +
+    "<p style='margin:0 0 2px'>品牌數: " + offers.length + "</p>" +
+    "<p style='margin:0'>最後更新: " + new Date(d?.updatedAt || 0).toLocaleString("zh-TW") + "</p>";
+}
+
+async function refreshOffers() {
+  togglePanel("settings");
+  try {
+    const res = await fetch(WORKER_URL + "/offers?api_key=" + encodeURIComponent(config.apiKey));
+    const json = await res.json();
+    offers = parseOffers(json.data || []);
+    storeSet(STORE_OFFERS, { offers, total: json.total, updatedAt: Date.now() });
+    document.getElementById("brandCount").textContent = offers.length + " 個品牌";
+    alert("品牌列表已更新，共 " + offers.length + " 個品牌");
+  } catch { alert("更新失敗，請稍後再試"); }
+}
+
+function handleLogout() {
+  if (!confirm("確定要清除所有資料嗎？")) return;
+  storeRemove(STORE_CONFIG);
+  storeRemove(STORE_OFFERS);
+  storeRemove(STORE_SUBIDS);
+  config = null;
+  offers = [];
+  currentPanel = null;
+  showSetupScreen();
+}
+
+// ═══════════════════════════════════════
+//  Init
+// ═══════════════════════════════════════
+(function init() {
+  config = storeGet(STORE_CONFIG);
+  const stored = storeGet(STORE_OFFERS);
+  history = storeGet(STORE_HISTORY) || [];
+
+  if (config && stored?.offers?.length) {
+    offers = stored.offers;
+    showMainScreen();
+  } else {
+    document.getElementById("apiKeyInput").value = config?.apiKey || "";
+  }
+
+  // Enter key on setup
+  document.getElementById("apiKeyInput").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") handleSetup();
+  });
+})();
+</script>
 </body>
 </html>
